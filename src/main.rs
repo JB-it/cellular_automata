@@ -1,6 +1,6 @@
 use egui::Pos2;
 use macroquad::prelude::*;
-use std::{thread::{self, JoinHandle}, time};
+use std::{thread, time};
 use std::sync::{Arc, Mutex};
 use std::mem;
 
@@ -73,18 +73,19 @@ impl Board {
 async fn main() {
     let game_mtx = Arc::new(Mutex::new(Board::new(const_ivec2!([26, 24]))));
     
+    //Initial board setup
     let mut c_game = game_mtx.lock().unwrap();
-
-    let rules = Rules {
-        birth: vec![false, false, false, true, false, false, false, false, false],
-        survive: vec![false, false, true, true, false, false, false, false, false],
-    };
 
     c_game.set_cell_at_position(1, 1, 1);
     c_game.set_cell_at_position(2, 1, 1);
     c_game.set_cell_at_position(3, 1, 1);
 
     drop(c_game);
+
+    let rules = Rules {
+        birth: vec![false, false, false, true, false, false, false, false, false],
+        survive: vec![false, false, true, true, false, false, false, false, false],
+    };
 
     let mut cell_below_mouse = IVec2::new(0, 0);
 
@@ -168,7 +169,7 @@ async fn main() {
 
             if handler.is_finished() {
                 let sm_cfg = simulation_cfg.clone();
-                let mut game_for_thread = game_mtx.clone();
+                let game_for_thread = game_mtx.clone();
                 let c_rules = rules.clone();
                 handler = thread::spawn(move || {
                     let time = sm_cfg.wait_time;
