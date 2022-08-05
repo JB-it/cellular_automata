@@ -3,7 +3,6 @@ use macroquad::prelude::*;
 use std::mem;
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
-use futures::executor::block_on;
 
 #[derive(Clone)]
 struct SimulationConfig {
@@ -105,19 +104,6 @@ async fn main() {
     let mut simulation_cfg = SimulationConfig::new(const_ivec2!([26, 20]));
 
     let mut handler = thread::spawn(|| {});
-
-    let sm_cfg = simulation_cfg.clone();
-    let game_for_thread = game_mtx.clone();
-    // thread::spawn(move || {
-    //     loop {
-    //         let c_game = game_for_thread.lock().unwrap();
-    //         clear_background(sm_cfg.dead_color);
-    //         draw_board(&c_game, &sm_cfg);
-    //         egui_macroquad::draw();
-    //         block_on(next_frame());
-    //     }
-    // });
-
 
     loop {
         egui_macroquad::ui(|egui_ctx| {
@@ -268,7 +254,7 @@ fn next_step(game: &mut Board, rules: &Rules) {
                     new_game_state.lower_cell_lifetime(x, y, 1);
                 }
             } else if rules.birth[neighbors as usize] {
-                new_game_state.set_cell_at_position(x, y, rules.adding_lifetime.clone());
+                new_game_state.set_cell_at_position(x, y, rules.adding_lifetime);
             } else {
                 new_game_state.set_cell_at_position(x, y, 0);
             }
